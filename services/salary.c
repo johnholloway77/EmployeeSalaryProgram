@@ -116,7 +116,7 @@ char lookupEmployeeSalary(char *file_address, const Employee *emp) {
 char printScheduleYear(char *file_address) {
 
   FILE *file = fopen(file_address, "r");
-  // char line[256];
+  char line[256];
   size_t len = 0;
   ssize_t read;
   int isFirstLine = 1;
@@ -130,94 +130,50 @@ char printScheduleYear(char *file_address) {
     exit(1);
   }
 
-  // int salIntTotal = 0;
-  // double fedDblTotal = 0.0;
-  // double albDblTotal = 0.0;
-  // double cppDblTotal = 0.0;
-  // double eiDblTotal = 0.0;
-  // double rspDblTotal = 0.0;
+  int salaryTotal = 0;
+  double fedTaxTotal = 0.0;
+  double albTaxTotal = 0.0;
+  double cppTotal = 0.0;
+  double eiTotal = 0.0;
+  double rspTotal = 0.0;
   double taxTotal;
   double netDblTotal;
 
-  // while (fgets(line, sizeof(line), file) != NULL) {
-
-  //   if (isFirstLine) {
-  //     isFirstLine = 0;
-  //     continue; // skip the first line
-  //   }
-
-  //   char empID[10];
-  //   char monthSal[10];
-  //   char monthFed[10];
-  //   char monthAlb[10];
-  //   char monthCPP[10];
-  //   char monthEI[10];
-  //   char monthRSP[10];
-
-  //   fscanf(file, "%s", empID);
-  //   fscanf(file, "%s", monthSal);
-  //   fscanf(file, "%s", monthFed);
-  //   fscanf(file, "%s", monthAlb);
-  //   fscanf(file, "%s", monthCPP);
-  //   fscanf(file, "%s", monthEI);
-  //   fscanf(file, "%s", monthRSP);
-
-  //   salIntTotal += atoi(monthSal);
-  //   fedDblTotal += atof(monthFed);
-  //   albDblTotal += atof(monthAlb);
-  //   cppDblTotal += atof(monthCPP);
-  //   eiDblTotal += atof(monthEI);
-  //   rspDblTotal += atof(monthRSP);
-  // }
-
-  // Initialize sums for each column
-  int monthlySalarySum = 0;
-  double fedTaxSum = 0.0;
-  double abTaxSum = 0.0;
-  double cppSum = 0.0;
-  double eiSum = 0.0;
-  int optRspSum = 0;
-
-  char line[256]; // Assuming each line in the file is no longer than 256
-                  // characters
-  // Skip the header line
-  fgets(line, sizeof(line), file);
-
-  // Iterate over each line in the file
   while (fgets(line, sizeof(line), file) != NULL) {
+
+    if (isFirstLine) {
+      isFirstLine = 0;
+      continue; // skip the first line
+    }
+
     char empID[10];
-    int monthlySalary;
-    double fedTax, abTax, cpp, ei;
-    int optRsp;
+    char monthSal[10];
+    char monthFed[10];
+    char monthAlb[10];
+    char monthCPP[10];
+    char monthEI[10];
+    char monthRSP[10];
 
-    // Parse each field from the line
-    sscanf(line, "%s %d %lf %lf %lf %lf %d", empID, &monthlySalary, &fedTax,
-           &abTax, &cpp, &ei, &optRsp);
+    fscanf(file, "%s", empID);
+    fscanf(file, "%s", monthSal);
+    fscanf(file, "%s", monthFed);
+    fscanf(file, "%s", monthAlb);
+    fscanf(file, "%s", monthCPP);
+    fscanf(file, "%s", monthEI);
+    fscanf(file, "%s", monthRSP);
 
-    // Accumulate the sums
-    monthlySalarySum += monthlySalary;
-    fedTaxSum += fedTax;
-    abTaxSum += abTax;
-    cppSum += cpp;
-    eiSum += ei;
-    optRspSum += optRsp;
+    salaryTotal += atoi(monthSal);
+    fedTaxTotal += atof(monthFed);
+    albTaxTotal += atof(monthAlb);
+    cppTotal += atof(monthCPP);
+    eiTotal += atof(monthEI);
+    rspTotal += atof(monthRSP);
   }
 
-  // taxTotal = fedDblTotal + albDblTotal;
-  // netDblTotal = (double)salIntTotal - (taxTotal + cppDblTotal +
-  //                              eiDblTotal + rspDblTotal);
+  taxTotal = fedTaxTotal + albTaxTotal;
+  netDblTotal =
+      salaryTotal - (taxTotal + cppTotal + eiTotal + rspTotal);
 
-  // Print the sums
-  printw("Monthly Salary Sum: %d\n", monthlySalarySum);
-  printw("Federal Tax Sum: %.2f\n", fedTaxSum);
-  printw("Alberta Tax Sum: %.2f\n", abTaxSum);
-  printw("CPP Sum: %.2f\n", cppSum);
-  printw("EI Sum: %.2f\n", eiSum);
-  printw("OptRSP Sum: %d\n", optRspSum);
-  refresh();
-
-  taxTotal = fedTaxSum + abTaxSum;
-  netDblTotal = monthlySalarySum - (taxTotal + cppSum + eiSum + optRspSum);
 
   printw(
       "%.*s\n", 70,
@@ -234,15 +190,15 @@ char printScheduleYear(char *file_address) {
   for (int i = 1; i <= 12; i++) {
 
     printw("%8d%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n", i,
-           monthlySalarySum / 12.0, taxTotal / 12.0, cppSum / 12.0,
-           eiSum / 12.0, optRspSum / 12.0, netDblTotal / 12.0);
+           salaryTotal / 12.0, taxTotal / 12.0, cppTotal / 12.0,
+           eiTotal / 12.0, rspTotal / 12.0, netDblTotal / 12.0);
   }
   refresh();
   printw(
       "%.*s\n", 70,
       "----------------------------------------------------------------------");
   printw("%8s%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n",
-         "Total:", monthlySalarySum, taxTotal, cppSum, eiSum, optRspSum,
+         "Total:", salaryTotal, taxTotal, cppTotal, eiTotal, rspTotal,
          netDblTotal);
 
   refresh();
