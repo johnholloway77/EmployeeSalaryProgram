@@ -2,9 +2,13 @@
 #include "../models/employee.h"
 #include "../models/employeeSalary.h"
 #include "close.h"
+
 #include "validFileName.h"
 
-char printEmployeeSalary(const Employee *e, char *file_address) {
+const double cpp_max = 3499.80;
+const double ei_max = 952.74;
+
+char lookupSalaryFile(char *file_address) {
   FILE *file;
 
   file = fopen(file_address, "r");
@@ -34,7 +38,7 @@ char printEmployeeSalary(const Employee *e, char *file_address) {
   return 0;
 }
 
-char lookupEmployeeSalary(char *file_address, const Employee *emp) {
+EmployeeSalary *printEmployeeSalary(char *file_address, const Employee *emp) {
 
   FILE *file = fopen(file_address, "r");
   char line[256];
@@ -56,6 +60,7 @@ char lookupEmployeeSalary(char *file_address, const Employee *emp) {
 
     if (strcmp(empID, emp->empID) == 0) {
 
+      EmployeeSalary *es = (EmployeeSalary *)malloc(sizeof(EmployeeSalary));
       char monthSal[10];
       char monthFed[10];
       char monthAlb[10];
@@ -78,6 +83,21 @@ char lookupEmployeeSalary(char *file_address, const Employee *emp) {
       fscanf(file, "%s", monthEI);
       fscanf(file, "%s", monthRSP);
 
+      strlcpy(es->empID, empID, sizeof(es->empID));
+      es->monthSal = atof(monthSal);
+      es->monthFed = atof(monthFed);
+      es->monthAlb = atof(monthAlb);
+      es->monthCPP = atof(monthCPP);
+      es->monthEI = atof(monthEI);
+      es->monthRSP = atof(monthRSP);
+
+      // strlcpy(es->monthSal, monthSal, sizeof(es->monthSal));
+      // strlcpy(es->monthFed, monthFed, sizeof(es->monthFed));
+      // strlcpy(es->monthAlb, monthAlb, sizeof(es->monthAlb));
+      // strlcpy(es->monthCPP, monthCPP, sizeof(es->monthCPP));
+      // strlcpy(es->monthEI, monthEI, sizeof(es->monthEI));
+      // strlcpy(es->monthRSP, monthRSP, sizeof(es->monthRSP));
+
       printw("%.*s\n", 70,
              "------------------------------------------------------------");
       refresh();
@@ -87,33 +107,33 @@ char lookupEmployeeSalary(char *file_address, const Employee *emp) {
       printw("%.*s\n", 70,
              "------------------------------------------------------------");
       refresh();
-      printw("%-21s$%s\n", "Monthly Salary:", monthSal);
+      printw("%-21s$%0.2f\n", "Monthly Salary:", atof(monthSal));
       refresh();
-      printw("%-21s$%s\n", "Monthly Federal Tax:", monthFed);
+      printw("%-21s$%0.2f\n", "Monthly Federal Tax:", atof(monthFed));
       refresh();
-      printw("%-21s$%s\n", "Montly Alberta Tax:", monthAlb);
+      printw("%-21s$%0.2f\n", "Montly Alberta Tax:", atof(monthAlb));
       refresh();
-      printw("%-21s$%s\n", "Monthly CPP:", monthCPP);
+      printw("%-21s$%0.2f\n", "Monthly CPP:", atof(monthCPP));
       refresh();
-      printw("%-21s$%s\n", "Monthly EI:", monthEI);
+      printw("%-21s$%0.2f\n", "Monthly EI:", atof(monthEI));
       refresh();
-      printw("%-21s$%s\n", "Monthly Opt. RSP:", monthRSP);
+      printw("%-21s$%0.2f\n", "Monthly Opt. RSP:", atof(monthRSP));
       refresh();
       refresh();
       printw("%.*s\n", 70,
              "------------------------------------------------------------");
       refresh();
       fclose(file);
-      return 0;
+      return es;
     }
   }
 
   printw("Could not find salary info\n");
   fclose(file);
-  return 1;
+  return NULL;
 }
 
-char printScheduleYear(char *file_address) {
+char printCompanyPaySchedule(char *file_address) {
 
   FILE *file = fopen(file_address, "r");
   char line[256];
@@ -171,9 +191,7 @@ char printScheduleYear(char *file_address) {
   }
 
   taxTotal = fedTaxTotal + albTaxTotal;
-  netDblTotal =
-      salaryTotal - (taxTotal + cppTotal + eiTotal + rspTotal);
-
+  netDblTotal = salaryTotal - (taxTotal + cppTotal + eiTotal + rspTotal);
 
   printw(
       "%.*s\n", 70,
@@ -189,46 +207,90 @@ char printScheduleYear(char *file_address) {
   refresh();
   for (int i = 1; i <= 12; i++) {
 
-    printw("%8d%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n", i,
-           salaryTotal / 12.0, taxTotal / 12.0, cppTotal / 12.0,
-           eiTotal / 12.0, rspTotal / 12.0, netDblTotal / 12.0);
+    printw("%8d%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n", i, salaryTotal / 12.0,
+           taxTotal / 12.0, cppTotal / 12.0, eiTotal / 12.0, rspTotal / 12.0,
+           netDblTotal / 12.0);
   }
   refresh();
   printw(
       "%.*s\n", 70,
       "----------------------------------------------------------------------");
-  printw("%8s%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n",
-         "Total:", salaryTotal, taxTotal, cppTotal, eiTotal, rspTotal,
-         netDblTotal);
+  printw("%8s%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n", "Total:", salaryTotal,
+         taxTotal, cppTotal, eiTotal, rspTotal, netDblTotal);
 
   refresh();
   fclose(file);
   return 0;
 }
 
-/*
-      char monthSal[10];
-      char monthFed[10];
-      char monthAlb[10];
-      char monthCPP[10];
-      char monthEI[10];
-      char monthRSP[10];
+char printPaySchedule(EmployeeSalary *es) {
 
-      fscanf(file, "%s", monthSal);
-      fscanf(file, "%s", monthFed);
-      fscanf(file, "%s", monthAlb);
-      fscanf(file, "%s", monthCPP);
-      fscanf(file, "%s", monthEI);
-      fscanf(file, "%s", monthRSP);
+  double yearSal = 0;
+  double yearTax = 0;
+  double yearCPP = 0;
+  double yearEI = 0;
+  double yearRSP = 0;
+  double yearNet = 0;
 
-      EmployeeSalary *es = (EmployeeSalary *)malloc(sizeof(EmployeeSalary));
+  double taxTotal = es->monthFed + es->monthAlb;
+  double netTotal =
+      es->monthSal - (taxTotal + es->monthCPP + es->monthEI + es->monthRSP);
 
-      strlcpy(es->empID, empID, sizeof(es->empID));
-      strlcpy(es->monthSal, monthSal, sizeof(es->monthSal));
-      strlcpy(es->monthFed, monthFed, sizeof(es->monthFed));
-      strlcpy(es->monthAlb, monthAlb, sizeof(es->monthAlb));
-      strlcpy(es->monthCPP, monthCPP, sizeof(es->monthCPP));
-      strlcpy(es->monthEI, monthEI, sizeof(es->monthEI));
-      strlcpy(es->monthRSP, monthRSP, sizeof(es->monthRSP));
+  printw(
+      "%.*s\n", 70,
+      "----------------------------------------------------------------------");
+  refresh();
 
-*/
+  printw("%20s%40s%10s\n", "Gross", "Optional", "Net");
+  printw("%8s%12s%10s%10s%10s%10s%10s\n", "Month", "Salary", "Tax", "CPP", "EI",
+         "RSP", "Salary");
+  printw(
+      "%.*s\n", 70,
+      "----------------------------------------------------------------------");
+  refresh();
+  for (int i = 1; i <= 12; i++) {
+
+    yearSal += es->monthSal;
+    yearTax += taxTotal;
+    yearRSP += es->monthRSP;
+    yearNet += netTotal;
+
+    double cpp;
+    double ei;
+
+    if ((yearCPP + es->monthCPP) >= cpp_max) {
+      cpp = cpp_max - yearCPP;
+      yearCPP = cpp_max;
+    } else {
+      cpp = es->monthCPP;
+        yearCPP += es->monthCPP;
+    }
+
+    if ((yearEI + es->monthEI) >= ei_max) {
+      ei = ei_max - yearEI;
+      yearEI = ei_max;
+    } else {
+      ei = es->monthEI;
+        yearEI += es->monthEI;
+    }
+
+    printw("%8d%12.2f%10.2f%10.2f%10.2f%10.2f%10.2f\n", i, es->monthSal,
+           taxTotal, cpp, ei, es->monthRSP, netTotal);
+  }
+  refresh();
+  printw(
+      "%.*s\n", 70,
+      "----------------------------------------------------------------------");
+
+  printw("%8s%*c%.2f%*c%.2f%*c%.2f%*c%.2f%*c%.2f%*c%.2f\n",
+         "Total:", 9 - (int)(log10(yearSal)) - 1, '$', yearSal,
+         7 - (int)(log10(yearTax)) - 1, '$', yearTax,
+         7 - (int)(log10(yearCPP)) - 1, '$', yearCPP,
+         7 - (int)(log10(yearEI)) - 1, '$', yearEI,
+         7 - (int)(log10(yearRSP)) - 1, '$', yearRSP,
+         7 - (int)(log10(yearNet)) - 1, '$', yearNet);
+
+  refresh();
+
+  return 0;
+}

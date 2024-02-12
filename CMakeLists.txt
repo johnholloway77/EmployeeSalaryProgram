@@ -19,7 +19,7 @@ add_executable(Assign2 main.c
     services/validFileName.c
     services/validFileName.h
 )
-target_link_libraries(Assign2 PRIVATE ${CURSES_LIBRARIES})
+target_link_libraries(Assign2 PRIVATE ${CURSES_LIBRARIES} m)
 
 include(GNUInstallDirs)
 install(TARGETS Assign2

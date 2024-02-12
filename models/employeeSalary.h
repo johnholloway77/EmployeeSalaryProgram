@@ -3,12 +3,12 @@
 
 typedef struct {
   char empID[10];
-  char monthSal[10];
-  char monthFed[10];
-  char monthAlb[10];
-  char monthCPP[10];
-  char monthEI[10];
-  char monthRSP[10];
+  double monthSal;
+  double monthFed;
+  double monthAlb;
+  double monthCPP;
+  double monthEI;
+  double monthRSP;
 } EmployeeSalary;
 
 #endif // EMPLOYEESALARY_H

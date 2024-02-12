@@ -15,6 +15,8 @@ int main(void) {
   char firstName[50];
   char lastName[50];
   char yn;
+  Employee *emp;
+  EmployeeSalary *es;
 
   initscr(); // initalize ncurses window
   cbreak();  // disable line buffering
@@ -39,7 +41,7 @@ int main(void) {
   noecho();
   clear();
 
-  Employee *emp = lookupEmployeeID(file_address, firstName, lastName);
+  emp = lookupEmployeeID(file_address, firstName, lastName);
 
   if (emp == NULL) {
     clear();
@@ -69,25 +71,19 @@ int main(void) {
     closeProg();
     exit(0);
   }
-  // yn = '.';
+
 
   echo();
   printw("Enter employee salaray filename (full path): ");
 
- getstr(file_address);
+  getstr(file_address);
+  noecho();
   clear();
 
-  printEmployeeSalary(emp, file_address);
+  lookupSalaryFile(file_address);
 
-  //having errors
-  lookupEmployeeSalary(file_address, emp);
+  es = printEmployeeSalary(file_address, emp);
 
-  // printw("%20s%})
-
-  // printw("%s %s %s %s %s \n", emp->empLastName, emp->empFirstName,
-  // emp->birthday,
-  //       emp->serviceStartDate, emp->empID);
-  // printw("%.50c", '*');
   refresh();
 
   printw("Would you like to caculate decutions & print salary schedule/year? "
@@ -104,18 +100,21 @@ int main(void) {
   }
   if (yn == 'n') {
     free(emp);
+    free(es);
     closeProg();
     exit(0);
   }
-  // yn = '.';
 
   clear();
 
-  printScheduleYear(file_address);
+
+  // printCompanyPaySchedule(file_address);
+  printPaySchedule(es);
 
   refresh();
 
   free(emp);
+  free(es);
   closeProg();
   return 0;
 }

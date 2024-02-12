@@ -2,6 +2,7 @@
 #define HEADERS_H
 
 #include <ctype.h>
+#include <math.h>
 #include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
